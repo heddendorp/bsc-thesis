@@ -13,5 +13,5 @@ jobs:
       - name: Github Action for LaTeX
         uses: xu-cheng/latex-action@1.0.6
         with:
-          root: LaTeX/main.tex
+          root: ./LaTeX/main.tex
 
