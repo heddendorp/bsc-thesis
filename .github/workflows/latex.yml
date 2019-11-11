@@ -1,0 +1,17 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v1
+      - name: Github Action for LaTeX
+        uses: xu-cheng/latex-action@1.0.6
+        with:
+          root: LaTeX/main.tex
+
