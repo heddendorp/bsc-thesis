@@ -13,5 +13,11 @@ jobs:
       - name: Github Action for LaTeX
         uses: xu-cheng/latex-action@1.0.6
         with:
-          root: ./LaTeX/main.tex
+          root: main.tex
+          working_directory: LaTeX
+      - name: Upload pdf
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: Thesis.pdf
+          path: LaTeX/build/main.pdf
 
