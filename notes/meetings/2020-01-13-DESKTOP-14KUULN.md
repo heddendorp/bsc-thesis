@@ -1,0 +1,23 @@
+# Meeting 13.01.2020
+## Problems
+ - Not sure how to recognize code that would work (Only C?)
+ - Hard to figure out what can be embedded and how
+
+## Progress
+ - Got wasm3 to calculate fibonacci numbers
+
+## Next steps
+ - Focus on the working runtime and move on
+ - Test write speed / memory speed / networking / compute speed / latency / talk to peripharals
+ - Figure out how to test certain features
+ - Reason for tests: Run on IoT devices to make them dynamically programmable
+ - Try to build the same c code for wasm and native compilation
+ - Example with button and led
+
+## New structure
+ - Think about the survey of existing runtimes
+    - Practical experience and types of problems
+ - Evaluation
+   - Test design Goal -> Benchmarks
+   - Run benchamrks and analyze results
+ - Experiments in chapter 5
