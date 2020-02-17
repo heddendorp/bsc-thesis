@@ -7,6 +7,8 @@
 #include "test_api.h"
 
 WASM_EXPORT
-void run(uint32_t n) {
-    mark();
+uint32_t run(uint32_t n) {
+    uint32_t result = 0;
+    result = sendValue();
+    return result;
 }
