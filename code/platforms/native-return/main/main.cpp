@@ -93,6 +93,12 @@ uint32_t sendValue() {
     return esp_timer_get_time();
 }
 
+/*uint32_t run(uint32_t n) {
+    uint32_t result = 0;
+    result = sendValue();
+    return result;
+}*/
+
 extern "C" void app_main(void) {
     int64_t start_setup = esp_timer_get_time();
     setup_wasm();
@@ -106,25 +112,25 @@ extern "C" void app_main(void) {
             run_wasm("20");
         }
         int64_t end_time = esp_timer_get_time();
-        wasm_time = (end_time - start_time) / 1;
+        wasm_time = (end_time - start_time);
     }
 
     for (long long &native_time : native_times) {
         int64_t start_time = esp_timer_get_time();
         for (int j = 0; j < 10; ++j) {
-            sendValue();
+            long result = run(20);
         }
         int64_t end_time = esp_timer_get_time();
-        native_time = (end_time - start_time) / 1;
+        native_time = (end_time - start_time);
     }
 
     printf("\nWasm3 v"
     M3_VERSION
     " on ESP32, build " __DATE__ " " __TIME__ "\n");
     printf("Setup time: %lld\n", (end_setup - start_setup));
-    printf("|Run|Access time|NATIVE|\n|---|---|---|\n");
+    printf("|Run\t|Access time\t|NATIVE\t|\n|---\t|---\t|---\t|\n");
     for (int i = 0; i < sizeof(wasm_times) / sizeof(wasm_times[0]); ++i) {
-        printf("|%d|%lld|%lld|\n", i + 1, wasm_times[i], native_times[i]);
+        printf("|%d\t|%lld\t|%lld\t|\n", i + 1, wasm_times[i], native_times[i]);
     }
     sleep(100);
     printf("Restarting...\n\n\n");
