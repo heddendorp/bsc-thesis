@@ -5,7 +5,8 @@
 \section{Finding a Runtime}
 As WASM needs an environment to run in, a runtime had to be found for this project as well. Most WASM runtimes these days exist in web-browsers, but with interest in other use cases emerging, more possibilities to run WASM outside the browser are becoming available. For this project, though, it was important to find a small runtime that could be executed on the ESP32.
 While there are more and more WASM runtimes outside of browsers available, most of them are meant to run on full-sized computers, do not offer a way of embedding, or are not written in C//C++. These requirements make them unusable on Microcontrollers.
-\subsection{Selection of WASM3}
+%\subsection{Selection of WASM3}
+
 WASM3 is a somewhat new effort to run WASM outside of the browser with the specific goal to allow execution on microcontroller platforms as well. It is also written entirely in C and allows embedding. According to benchmarks run by the creators, comparing them to other WASM runtimes, WASM3 performs about 4-5x slower than the best just in time engines and about 12x slower than native code execution.
 WASM3 also uses the interpreter model instead of a just in time compilation method, which would increase execution speed. However, there are tradeoffs of executable size memory usage and startup latency, which make the interpreter approach a better fit for our use case.
 \section{Designing Tests}
@@ -38,6 +39,9 @@ Running this function in the main program described in section \ref{subsec:testi
 
 As is evident from the measurements, the interpreter introduces a 90x slowdown of the WASM execution compared to the native one.
 \subsection{Testing memory performance}
+Of course the memory performance is an important aspect of any computing platform so we designed a test to compare it between native and WASM execution.
+\lstinputlisting[language=C++, caption=Linear memory test]{../data/test_memory.cpp}
+The setup is fairly simple, an array is created and filled with the indeices of the respective following elements, imitating a linked list. Then it is read from, starting at index 1 and saving whatever index was found there into a variable that defines the next index to be read until finally the next index ends up being 0. Lastly the next index is returned to prevent comoiler optimization.
 \subsection{Testing recursive calls}
 The test of recursive calls is run by calculating Fibonacci numbers with the following code.
 \lstinputlisting[language=C++, caption=Recursive calling test, label=lst:recursive_cpp]{../data/test_recursive.cpp}
