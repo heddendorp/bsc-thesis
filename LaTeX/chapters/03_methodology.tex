@@ -46,4 +46,16 @@ Listing \ref{lst:recursive_wat} shows the WebAssembly text format generated for 
 It is important to note that this text format is not strictly WebAssembly, but one version to make it readable for humans. To make it more similar to the look of common programming languages for this listing, code folding was applied. To make the difference visible, listing \ref{lst:recursive_wat-2} shows the WASM code without folding.
 \lstinputlisting[caption=WASM code without folding, label=lst:recursive_wat-2]{../data/wat-recursive-2.wat}
 \subsection{Testing switch statements}
+\lstinputlisting[language=C++, caption=Switch statement test code]{../data/test_switch.cpp}
 \subsection{Testing native calls}\label{subsec:native}
+A very important function of the runtime is to expose outside functions to the WASM module and allow the interaction with other libraries from within the WASM code. Fpr this we designed two failry simple tests that call functions not defined in the WASM code.
+\lstinputlisting[language=C++, caption=Outside call test code, label=lst:native_test]{../data/test_native.cpp}
+As is obvious from listing \ref{lst:native_test}, the test code just calls the outside \lstinline{mark()} function. There is also an import of the test api header in which the external function is defined to make the testcode compile.
+\lstinputlisting[language=C++, caption=Test api defintiion, label=lst:test_native_api]{../data/test_native_api.cpp}
+The resulting WASM code does not include the \lstinline{mark} method but inmstead imports it from the \lstinline{thesis} module that is expected to be avalialbe at runtime.
+\lstinputlisting[caption=WASM code for the outside call, label=lst:test_native_wasm]{../data/test_native.wat}
+As displayed in listing \ref{lst:test_native_wasm} line \ref{n-wat:import} the mark function from the thesis module is imported as defined in listing \ref{lst:test_native_api}. The run function then just calls the imported function in line \ref{n-wat:call}.
+
+In order to provide this importet functionat runtime the setup for opur tests has to be changed slightly, namely it has to be linked druing the runtime setup in listing \ref{lst:runtime_setup}.
+\lstinputlisting[language=C++, caption=Function linking, label=lst:test_native_main]{../data/test_native_main.cpp}
+In listing \ref{lst:test_native_main} line \ref{n-wat:global} we introduce a varibel to hold a timestamp after the \lstinline{mark} function was called. In line \ref{n-wat:mark_link} we define the function, which just saves the current timestamp and ends with success. This is then linked into the runtime in line \ref{n-wat:link}. To compare netive exectuion this time we can not call the exact same function, since it was not compiled to WASM at all, so we implement a similar function in line \ref{n-wat:mark_native} that is called during the test of native exectuion.
