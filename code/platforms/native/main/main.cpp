@@ -91,21 +91,21 @@ extern "C" void app_main(void) {
     int64_t native_times[100];
 
     for (long long &wasm_time : wasm_times) {
-//        int64_t start_time = esp_timer_get_time();
+        int64_t start_time = esp_timer_get_time();
         for (int j = 0; j < 10; ++j) {
             run_wasm("20");
         }
         int64_t end_time = esp_timer_get_time();
-        wasm_time = (end_time - native_timestamp);
+        wasm_time = (end_time - start_time);
     }
 
     for (long long &native_time : native_times) {
-//        int64_t start_time = esp_timer_get_time();
+        int64_t start_time = esp_timer_get_time();
         for (int j = 0; j < 10; ++j) {
             mark();
         }
         int64_t end_time = esp_timer_get_time();
-        native_time = (end_time - native_timestamp);
+        native_time = (end_time - start_time);
     }
 
     printf("\nWasm3 v" M3_VERSION " on ESP32, build " __DATE__ " " __TIME__ "\n");

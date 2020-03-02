@@ -18,28 +18,18 @@ unsigned randWASM()
     return lfsr =  (lfsr >> 1) | (bit << 15);
 }
 
-void random_shuffle(unsigned int *list, int32_t N)
-{
-    for (int32_t i=0; i<N-1; ++i) {
-        int32_t swap_ix = i + randWASM() % (N-i);
-        unsigned int tmp = list[swap_ix];
-        list[swap_ix] = list[i];
-        list[i] = tmp;
-    }
-}
-
 WASM_EXPORT
 uint32_t run(uint32_t n) {
     uint32_t array1[n];
 
-    random_shuffle(array1, n);
     for (int i = 0; i < n; ++i) {
-        array1[i] = i+1;
+        int32_t val = randWASM() % n;
+        array1[val] = i;
     }
-    array1[n-1] = 0;
     uint32_t nextStep = 1;
-    while(nextStep){
-        nextStep = array1[nextStep];
+    for (int i = 0; i < n; ++i) {
+        int32_t val = randWASM() % n;
+        nextStep = array1[val] = i;
     }
     return nextStep;
 }
