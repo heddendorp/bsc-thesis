@@ -1,4 +1,85 @@
 % !TeX root = ../main.tex
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
-\chapter{Benchmarking}\label{chapter:benchmarking}
+\chapter{Evaluation}\label{chapter:evaluation}
+\section{Running benchmarks}
+In order to collect results we ran all the tests described in the previous section on an ESP32 and gathered the timings here. As expected, running the code in a interpreter produces a significant slowdown. We want to analyze the the different test results and their impact of the usefulness of WASM on MCUs.
+\section{Benchmark results}
+Similar to the tests, we want to look at the results by the functional requirement they describe.
+\subsection{Recursive calls}
+Calling functions is an integral capabnilty of any application, so this is the first test to compare WASM with the native execution of our code.
+
+\begin{table}
+    \begin{tabular}{l c c}
+        Run & WASM Execution & Native Exectuion \\
+        10  & 41766          & 1000             \\
+        11  & 41767          & 1000             \\
+        12  & 41766          & 1000             \\
+        13  & 41767          & 1000             \\
+        14  & 41766          & 1000             \\
+        15  & 41767          & 1000             \\
+        16  & 41766          & 1000             \\
+        17  & 41766          & 1000             \\
+    \end{tabular}
+    \caption{Exerpt of the measured times for recursive calls}
+    \label{tab:times_recursive}
+\end{table}
+As is obvious from the measured times the variance is very low here, this is to be expected since the tests ran without any other load on the MCU and the dterministic nature of FreeRTOS as mentioned in section \ref{subsec:freertos}.
+
+Even though the actual applicatins running on an MCU might not do recursive calculations it does provide an insight into the overhead vreated by executing function calls in the interpreter. This overhead causes a slowdown of about 41x which is consinstent through ultiple tests with other numbers to calculate.
+
+As seen in the WASM code of listing \ref{lst:recursive_wat} it's actually very simple but requires the runtime to manage the execution of the same functions many times over.
+\subsection{Swicth statements}
+TODO: FIX SWITCH TEST BEFORE WRITING
+\subsection{Memory access}
+TODO: REIMPLEMENT SHUFFLE
+\subsection{Matrix multiplication}
+TODO: UPDATE MATRIX CODE TO NOT USE SIZEOF()
+\begin{table}
+    \begin{tabular}{rcc}
+        Run & WASM exectuion & native exectuion \\
+        1 & 26283 & 285 \\
+        2 & 26277 & 281 \\
+        3 & 26277 & 282 \\
+        4 & 26277 & 281 \\
+        5 & 26277 & 281 \\
+        6 & 26277 & 282 \\
+    \end{tabular}
+    \caption{Exerpt of the measured times for matrix multiplication}
+\end{table}
+As is evident from the measurements, the interpreter introduces a 90x slowdown of the WASM execution compared to the native one.
+\subsection{Calling of native code}
+Of course not all functionality can be included in the WASM module, especially native platform features will have to make use of cuntions only avaliable outside of the engine.
+
+\begin{table}
+    \begin{tabular}{l c c}
+        Run & WASM Execution & Native Exectuion \\
+        15  & 33             & 7                \\
+        16  & 33             & 8                \\
+        17  & 33             & 7                \\
+        18  & 32             & 8                \\
+        19  & 33             & 8                \\
+        20  & 32             & 8                \\
+        21  & 33             & 8                \\
+        22  & 32             & 7                \\
+        23  & 33             & 8                \\
+        24  & 32             & 7                \\
+        25  & 33             & 8                \\
+    \end{tabular}
+    \caption{Exerpt of the measured times for external calls}
+    \label{tab:times_native}
+\end{table}
+
+\section{Learnings}
+\subsection{Drawbacks of WASM execution}
+The very obvious drawback of executing WebAssembly on a microcontroller is the performance loss that comes with it. We have shown this with all our tests and even though the slowdown varies from test to test, code compiled to WASM and executed by an interpreter will run an order of magnitude slower than the same code directly compiled into the main program and executed on the MCUs CPU.
+
+Next to the perforamnce decrease the longer runtime also means that more energy will be used to achieve the same result. Using about 40x more power for one task is an important consideration for applications with MCUs running on a battery insteads of having a stable power connection. For reference, enabling WiFi on the ESP32 can increase power consumption by up to six times compared to regular usage\autocite{espressif_esp32_2020}.
+
+Apart from impact on the running of program code on the MCU we also noticed other limitataions. The availability of certain expected functionality in WASM is very limited. For example, the use of \lstinline{malloc()} is not possible if comoiling code to WASM and running it in our runtime. In webbrowsers this functionality is avaliable for import from the environment and implemented such that it can be used as expected. WASM3 howerver does not offer any functions for import and implementing dynaic memory management would be a major effort.
+
+Since the problem of system access outside the beowser is very common, a subgroup of the WASM community group is working on specifying a system interface for WASM\autocite{clark_standardizing_2019}. The WebAssembly system interface (WASI) is meant to provide a foundation for developers to build upon when targeting non-browser platforms. Once specified, code compiled for WASI will run in any WASI-compliant runtime, truly enebaling WASMs protanbility.
+\subsection{Usecases for WASM on ESP32}
+From our tests we can see that WASM comes with major downsides right now, that is slower execution across the bench of any kind of task. This does not mean however that it's unusable in an embedded contaxt, but that it's usage should be carefully evaluated. If the MCU is continually working and collecting data for example it might not be a good fit, since the use of WASM would limit the efficiency of the MCU.
+
+From what we saw in our tests, we think that WASM is an option to be considered especially for projects that only need short program to be run in longer intervals. Here the disadvantages of lower performance and higher execution time do not have much of an impact. One example for such an application is a sensor monitoring the rooms temperature and possibly taking action such as adjusting the heating. In this scenario the longer execution time would not pose any issue since the reaction is not affected by a small delay.

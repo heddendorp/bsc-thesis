@@ -2,55 +2,71 @@
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
 \chapter{Methodology}\label{chapter:methodology}
-\section{Finding a Runtime}
-As WASM needs an environment to run in, a runtime had to be found for this project as well. Most WASM runtimes these days exist in web-browsers, but with interest in other use cases emerging, more possibilities to run WASM outside the browser are becoming available. For this project, though, it was important to find a small runtime that could be executed on the ESP32.
-While there are more and more WASM runtimes outside of browsers available, most of them are meant to run on full-sized computers, do not offer a way of embedding, or are not written in C//C++. These requirements make them unusable on Microcontrollers.
-%\subsection{Selection of WASM3}
+\section{Running WebAssembly}
+The goal of this thesis is to evaluate the use of WebAssembly for programming an ESP 32 Microcontroller. After we have introduced the concepts around MCUs and WebAssembly, we would like to explain our approach of evaluation WebAssembly.
 
-WASM3 is a somewhat new effort to run WASM outside of the browser with the specific goal to allow execution on microcontroller platforms as well. It is also written entirely in C and allows embedding. According to benchmarks run by the creators, comparing them to other WASM runtimes, WASM3 performs about 4-5x slower than the best just in time engines and about 12x slower than native code execution.
-WASM3 also uses the interpreter model instead of a just in time compilation method, which would increase execution speed. However, there are tradeoffs of executable size memory usage and startup latency, which make the interpreter approach a better fit for our use case.
-\section{Designing Tests}
-To assess the viability of running WebAssembly on an MCU, there had to be some comparison. For this, we decided to design multiple performance tests that measure common use-cases in both native and WASM execution.
-The cases we tested are matrix multiplication, random and linear memory performance, recursive calculation, switch statements, and native calls. The last test is interesting in this context since the runtime provides a way to call outside functionality from within the WASM module. This allows for actual communication of the WASM code with the outside environment.
+Firstly, as explained earlier, WebAssembly always needs a runtime, which is usually provided by the browser. In this case, we do not need all the features a browser would provide, just a way to execute WASM. Since the momentum around running WASM outside of a browser environment is picking up recently, more and more runtimes become available. A big push for WebAssembly on new platforms came in November of 2019 in the form of the Bytecode Alliance \autocite{noauthor_bytecode_nodate}. An open-source community dedicated to creating the foundations needed to run WASM on multiple platforms in a secure way.
+
+The Bytecode Alliance maintains a couple of different compilers and runtimes for WebAssembly. This project includes the WebAssembly Micro Runtime (WAMR), which is an interpreter based runtime, specifically meant to run on embedded devices such as the ESP32 \autocite{noauthor_bytecodealliancewasm-micro-runtime_2020}. While looking at this project, we had to find out that the OS used by the ESP32 (FreeRTOS) was not yet supported, with no current plans to change that.
+
+While a couple of other WebAssembly runtimes are available, \autocite{akinyemi_appcypherawesome-wasm-runtimes_2020} WAMR used to be the only one capable of running on an embedded device. In late 2019 the second runtime for embedded devices was released in WASM3 \autocite{noauthor_wasm3wasm3_2020}. This runtime is the first one we know of to support the ESP32 and FreeRTOS. It also performs significantly better than WAMR in benchmarks \autocite{shymanskyy_wasm3_2020}. Thus we decided that using WASM3 was the way to go about running WASM on the ESP32.
+
+According to the developers' measurements, WASM3 is currently the fastest available WebAssembly interpreter, being about 4x slower than current just in time compiling runtimes and about 12x slower than native execution. Because of the strict constraints that embedded devices have, WASM3 uses an interpreter model, which is more memory efficient and provides better startup times than JIT compilation. It also makes portability and security much easier to achieve and maintain.
+
+\section{Comparing the platform}
+After finding a way to run WebAssembly on the ESP32 and verifying it with basic tests, we had to find a way to measure how well that works. In order to compare different platforms, a popular tool is benchmarking, in which the same workload is run on multiple platforms to generate values to compare those platforms by.
+
+While most benchmarks are meant to provide a comparison of two hardware platforms, in this specific case, we are not interested in the performance of the platform. Instead, we are interested in the performance of different execution models on the same platform, being the default native execution of code explicitly compiled for the ESP32 and the interpreted execution of the WASM code that could run anywhere.
+
+Our desired comparison makes the test setup quite simple, the basic idea is to run the same code on the ESP32 twice, but once compiled to WASM. This approach has worked for the most part, with small detours being made when testing the import of outside functions into WebAssembly. All tests consist of a \lstinline{run} method, which is once called from the main file and once loaded into the engine and run as a WASM function.
+
+In line with how benchmarks work, we set out to design a couple of workloads we could run in both the native and the WebAssembly environments and compare the way they execute. In order to generate meaningful results, we tried to find simple tests that are not too far from what an MCU would execute. Keeping the tests limited and simple also allows us to look at the WASM output and understand a little more about the new concepts introduced.
+
+\subsection{Specialized Workloads}
+
+The first and most basic test is recursively calculating a Fibonacci number, while extensive recursive calls are not a part of most applications, functions calls in general are. This also shows some WebAssembly specific features since it doe not only have jumps available but allows functions and function calls in the assembler code.
+
+Secondly, switch and if statements are an integral part of any application. So comparing the performance of a switch statement is another indicator of how good applications would perform.
+
+Of course, every application needs memory access, so we decided to implement two memory tests. One using linear access and one using random access to see if there is any impact on performance. Combining memory access and calculation, we also ran a matrix multiplication. This algorithm is the basis for many more complex algorithms, and the tight inner loop offers itself for optimization on the hardware and during compilation.
+
+Lastly, it is essential for embedded devices to also have hardware access. Currently, WebAssembly does not have a model of specific hardware features, network stack, or even CPU cores. All this functionality is assumed to be in the browser environment. The runtime we selected offers a mechanic to link external functions that can then be called from the WASM code, so we designed tests to see if outside calls came with a significant overhead that would impact applications using them.
+
 \section{Running tests}
 All tests where run on the ESP-WROOM-32 using the IDF provided by espressif. The same code was compiled to WebAssembly and also imported into the test program to allow for native execution. Then the test code was run multiple times to spot inconsistencies between the runs. The results from these tests will be explained in more detail in a specific section for each test.
+
 \subsection{Testing setup}\label{subsec:testing_setup}
 All tests share a very similar main program to execute and time the tests, which we would like to explain now.
 \lstinputlisting[language=C++, caption=Main testing method]{../data/testing_method.cpp}
 The main testing method starts with setting up the WebAssembly runtime, which will be further explained with Listing \ref{lst:runtime_setup}. This process is timed to see how much overhead the runtime initialization introduces. Next, there are two arrays set up to hold the test results. Then the test is run for the WASM with the function described in listing \ref{lst:test_exec}, by taking the average time over ten runs and saving that into the previously declared array. Following, the same is done for the native version of the test code. Lastly, the results are printed to the console, and the controller is eventually restarted to rerun the tests.
 \lstinputlisting[language=C++, caption=Runtime setup, label=lst:runtime_setup]{../data/runtime_setup.cpp}
-setting up the runtime is pretty straight forward, initially, the WASM module is imported from a header file, together with its length. Then the environment and runtime are created, followed by parsing the module. If the runtime has to provide functions that the WASM module relies upon, they are linked after loading the module. An example can be found in section \ref{subsec:native} in which lines 24 and 25 of listing \ref{lst:runtime_setup} are not commented out. Once the runtime is fully set up, the function itself is searched for. In our case, the functions name is always "run".
+Setting up the runtime is pretty straight forward, initially, the WASM module is imported from a header file, together with its length. Then the environment and runtime are created, followed by parsing the module. If the runtime has to provide functions that the WASM module relies upon, they are linked after loading the module. An example can be found in section \ref{subsec:native} in which lines 24 and 25 of listing \ref{lst:runtime_setup} are not commented out. Once the runtime is fully set up, the function itself is searched for. In our case, the functions name is always "run".
 \lstinputlisting[language=C++, caption=WASM execution, label=lst:test_exec]{../data/test_exec.cpp}
 The execution of the WASM function is a matter of calling the previously found function with the runtimes \lstinline{m3_CallWithArgs()} method and supplying it with the input arguments. The return value of the operation can be found on the virtual machines stack afterward.
+
 \subsection{Testing matrix multiplication}
 To test performance during matrix multiplication, then function takes one argument, the matrix size. It then creates two nxn matrices and multiplies them. In the end, it returns one value of the resulting matrix. This is to prevent the compiler from deleting the actual calculation during compilation.
 \lstinputlisting[language=C++, caption=Matrix multiply test]{../data/test_matrix.cpp}
 Running this function in the main program described in section \ref{subsec:testing_setup} results in the Following measurements for the average execution times of 100 runs.
 
-\begin{tabular}{rcc}
-    Run & WASM exectuion & native exectuion \\
-    1 & 26283 & 285 \\
-    2 & 26277 & 281 \\
-    3 & 26277 & 282 \\
-    4 & 26277 & 281 \\
-    5 & 26277 & 281 \\
-    6 & 26277 & 282 \\
-\end{tabular}
-
-As is evident from the measurements, the interpreter introduces a 90x slowdown of the WASM execution compared to the native one.
 \subsection{Testing memory performance}
 Of course the memory performance is an important aspect of any computing platform so we designed a test to compare it between native and WASM execution.
 \lstinputlisting[language=C++, caption=Linear memory test]{../data/test_memory.cpp}
 The setup is fairly simple, an array is created and filled with the indeices of the respective following elements, imitating a linked list. Then it is read from, starting at index 1 and saving whatever index was found there into a variable that defines the next index to be read until finally the next index ends up being 0. Lastly the next index is returned to prevent comoiler optimization.
+
 \subsection{Testing recursive calls}
 The test of recursive calls is run by calculating Fibonacci numbers with the following code.
 \lstinputlisting[language=C++, caption=Recursive calling test, label=lst:recursive_cpp]{../data/test_recursive.cpp}
 \lstinputlisting[caption=WASM code excerpt, label=lst:recursive_wat]{../data/test_recursive.wat}
-Listing \ref{lst:recursive_wat} shows the WebAssembly text format generated for the Fibonacci function in listing \ref{lst:recursive_cpp} and we would like to take a closer look at what the WASM module looks like for this specific example. After the module opening, the type of our \lstinline{uint32_t run(uint32_t n)} function is defined and reused in the function definition in line \ref{r-wat:func}, in this line the functions input and return types are also defined. The input is assigned to the \$p0 variable for later use. In line \ref{r-wat:block} the block \lstinline{$B0} is started, it contains the main function body. In line \ref{r-wat:if}, we can see a \lstinline{br_if} instruction; this is a conditional break that breaks the execution of the passed block if the condition is true. The condition, in this case, is the rest of the instructions included in the parentheses. Namely the comparison of the accepted parameter with 2 to see if it is smaller if that is the case the remaining block is skipped and code execution would continue in line \ref{r-wat:end} where the parameter is pushed on the stack, as the topmost value of the stack after the execution is the return value of a WASM function. Alternatively, the execution could continue in line \ref{r-wat:return} with the \lstinline{return} instruction, which executes the instructions inside the parentheses and prevents any further code execution after that, mirroring the common return instruction in C. the Value return is the result of the two recursive calls of line \ref{r-cpp:return2} in the C listing. The \lstinline{run} function is called again by using the \lstinline{call} instruction in lines \ref{r-wat:call1} and \ref{r-wat:call2}.   
+Listing \ref{lst:recursive_wat} shows the WebAssembly text format generated for the Fibonacci function in listing \ref{lst:recursive_cpp} and we would like to take a closer look at what the WASM module looks like for this specific example. After the module opening, the type of our \lstinline{uint32_t run(uint32_t n)} function is defined and reused in the function definition in line \ref{r-wat:func}, in this line the functions input and return types are also defined. The input is assigned to the \$p0 variable for later use. In line \ref{r-wat:block} the block \lstinline{$B0} is started, it contains the main function body. In line \ref{r-wat:if}, we can see a \lstinline{br_if} instruction; this is a conditional break that breaks the execution of the passed block if the condition is true. The condition, in this case, is the rest of the instructions included in the parentheses. Namely the comparison of the accepted parameter with 2 to see if it is smaller if that is the case the remaining block is skipped and code execution would continue in line \ref{r-wat:end} where the parameter is pushed on the stack, as the topmost value of the stack after the execution is the return value of a WASM function. Alternatively, the execution could continue in line \ref{r-wat:return} with the \lstinline{return} instruction, which executes the instructions inside the parentheses and prevents any further code execution after that, mirroring the common return instruction in C. the Value return is the result of the two recursive calls of line \ref{r-cpp:return2} in the C listing. The \lstinline{run} function is called again by using the \lstinline{call} instruction in lines \ref{r-wat:call1} and \ref{r-wat:call2}.
+
 It is important to note that this text format is not strictly WebAssembly, but one version to make it readable for humans. To make it more similar to the look of common programming languages for this listing, code folding was applied. To make the difference visible, listing \ref{lst:recursive_wat-2} shows the WASM code without folding.
 \lstinputlisting[caption=WASM code without folding, label=lst:recursive_wat-2]{../data/wat-recursive-2.wat}
+
 \subsection{Testing switch statements}
-\lstinputlisting[language=C++, caption=Switch statement test code]{../data/test_switch.cpp}
+%\lstinputlisting[language=C++, caption=Switch statement test code]{../data/test_switch.cpp}
+As previously motivated, switch stantements are a very common occurance in software running on microcontrollers and thus a thing to be tested. The test method for this is a big switch statement that is looped over. The result of this is secondary and just included to guarantee compilation.
+
 \subsection{Testing native calls}\label{subsec:native}
 A very important function of the runtime is to expose outside functions to the WASM module and allow the interaction with other libraries from within the WASM code. Fpr this we designed two failry simple tests that call functions not defined in the WASM code.
 \lstinputlisting[language=C++, caption=Outside call test code, label=lst:native_test]{../data/test_native.cpp}

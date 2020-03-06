@@ -29,7 +29,7 @@ uint32_t run(uint32_t n) {
     uint32_t nextStep = 1;
     for (int i = 0; i < n; ++i) {
         int32_t val = randWASM() % n;
-        nextStep = array1[val] = i;
+        nextStep = array1[val];
     }
     return nextStep;
 }
