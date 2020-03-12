@@ -110,9 +110,9 @@ extern "C" void app_main(void) {
 
     printf("\nWasm3 v" M3_VERSION " on ESP32, build " __DATE__ " " __TIME__ "\n");
     printf("Setup time: %lld\n", (end_setup - start_setup));
-    printf("|Run\t|WASM\t|NATIVE\t|\n|---\t|---\t|---\t|\n");
+    printf("Run\t& WASM\t& NATIVE\t//\n");
     for (int i = 0; i < sizeof(wasm_times) / sizeof(wasm_times[0]); ++i) {
-        printf("|%d\t|%lld\t|%lld\t|\n", i + 1, wasm_times[i], native_times[i]);
+        printf("%d\t& %lld\t& %lld\t//\n", i + 1, wasm_times[i], native_times[i]);
     }
     sleep(100);
     printf("Restarting...\n\n\n");
