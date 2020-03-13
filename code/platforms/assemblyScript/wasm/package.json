@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "asbuild:untouched": "asc assembly/index.ts -b build/untouched.wasm -t build/untouched.wat --validate --sourceMap --debug",
+    "asbuild:optimized": "asc assembly/index.ts -b build/optimized.wasm -t build/optimized.wat --validate --sourceMap --optimize",
+    "asbuild:wasm3": "asc assembly/index.ts -b test.wasm -t test.wat --validate --sourceMap -O3z --runtime none --noAssert",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized && npm run asbuild:wasm3",
+    "test": "node tests"
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.9.4"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.9.4"
+  }
+}
