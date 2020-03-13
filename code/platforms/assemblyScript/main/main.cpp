@@ -1,41 +1,19 @@
-//
-//  Wasm3 - high performance WebAssembly interpreter written in C.
-//
-//  Copyright © 2019 Steven Massey, Volodymyr Shymanskyy.
-//  All rights reserved.
-//
-
 #include "esp_system.h"
 
 #include <stdio.h>
+#include <time.h>
 #include <unistd.h>
 #include <esp_timer.h>
+#include <sstream>
 #include <string.h>
 
 #include "wasm3.h"
 #include "m3_env.h"
-#include <m3_api_defs.h>
 
 #include "test.wasm.h"
 #include "../wasm/test.cpp"
 
 #define FATAL(msg, ...) { printf("Fatal: " msg "\n", ##__VA_ARGS__); return; }
-
-
-int64_t native_timestamp;
-
-m3ApiRawFunction(m3_thesis_mark) {
-    native_timestamp = esp_timer_get_time();
-    m3ApiSuccess();
-}
-
-M3Result LinkThesis(IM3Runtime runtime) {
-    IM3Module module = runtime->modules;
-    const char *thesis = "thesis";
-
-    m3_LinkRawFunction(module, thesis, "mark", "i()", &m3_thesis_mark);
-    return m3Err_none;
-}
 
 IM3Environment env;
 IM3Runtime runtime;
@@ -45,8 +23,8 @@ IM3Function f;
 static void setup_wasm() {
     M3Result result = m3Err_none;
 
-    auto *wasm = (uint8_t *) wasm_test_cpp_wasm;
-    uint32_t fsize = wasm_test_cpp_wasm_len - 1;
+    auto *wasm = (uint8_t *) wasm_test_wasm;
+    uint32_t fsize = wasm_test_wasm_len - 1;
 
     env = m3_NewEnvironment();
     if (!env) FATAL("m3_NewEnvironment failed");
@@ -60,8 +38,8 @@ static void setup_wasm() {
     result = m3_LoadModule(runtime, module);
     if (result) FATAL("m3_LoadModule: %s", result);
 
-    result = LinkThesis(runtime);
-    if (result) FATAL("LinkThesis: %s", result);
+//    result = LinkThesis(runtime);
+//    if (result) FATAL("LinkThesis: %s", result);
 
     result = m3_FindFunction(&f, runtime, "run");
     if (result) FATAL("m3_FindFunction: %s", result);
@@ -79,8 +57,12 @@ static void run_wasm(const char *input1) {
 //    printf("Result: %ld\n", value);
 }
 
-void mark() {
-    native_timestamp = esp_timer_get_time();
+uint32_t binomial(uint32_t n, uint32_t m) {
+    if (m != 0 && n != m) {
+        return binomial(n - 1, m) + binomial(n - 1, m - 1);
+    } else {
+        return 1;
+    }
 }
 
 extern "C" void app_main(void) {
@@ -96,16 +78,17 @@ extern "C" void app_main(void) {
             run_wasm("20");
         }
         int64_t end_time = esp_timer_get_time();
-        wasm_time = (end_time - start_time);
+        wasm_time = (end_time - start_time) / 10;
     }
 
     for (long long &native_time : native_times) {
         int64_t start_time = esp_timer_get_time();
         for (int j = 0; j < 10; ++j) {
-            mark();
+            long value = run(20);
+//            printf("Result: %ld\n", value);
         }
         int64_t end_time = esp_timer_get_time();
-        native_time = (end_time - start_time);
+        native_time = (end_time - start_time) / 10;
     }
 
     printf("\nWasm3 v" M3_VERSION " on ESP32, build " __DATE__ " " __TIME__ "\n");

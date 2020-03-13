@@ -62,7 +62,7 @@ WASM_IMPORT("thesis", "mark")        void mark             (void);
 The results this time are the difference in microseconds from the timestamp created by the called function to the timestamp after the test exections have finished.
 
 `Wasm3 v0.4.6 on ESP32, build Feb 17 2020 15:58:02`   
-`Setup time: 1332`
+`Setup time: 1332`   
 Run     & WASM  & NATIVE        //
 1       & 84    & 12    //
 2       & 32    & 7     //
@@ -179,7 +179,7 @@ uint32_t run(uint32_t n) {
 Times for ten runs each 
 
 `Wasm3 v0.4.6 on ESP32, build Mar  2 2020 14:40:20`   
-`Setup time: 1352`
+`Setup time: 1352`   
 Run     & WASM  & NATIVE        //
 1       & 82    & 12    //
 2       & 33    & 7     //
