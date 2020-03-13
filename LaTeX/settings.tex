@@ -70,3 +70,32 @@
   keywordstyle=\bfseries\color{TUMBlue},
   stringstyle=\color{TUMAccentGreen}
 }
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{TUMDarkGray}\bfseries,
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinelanguage{WebAssembly}{
+  sensitive=true,
+  otherkeywords={},
+  morekeywords=[1]{i32,f32,i64,f64},
+  keywordstyle={[1]\color{TUMAccentGreen}},
+  morekeywords=[2]{0},
+  keywordstyle={[2]\color{TUMAccentGreen}},
+  morekeywords=[3]{add,const}
+  keywordstyle={[3]\color{TUMAccentOrange}},
+  morekeywords=[5]{module, func, param, result, global, get_global, mut, set_global, export, import, memory, data, get_local, set_local, elem, table, call,call_indirect, type},
+  keywordstyle={[5]\color{TUMBlue}},
+  morekeywords=[6]{=,;},
+  keywordstyle={[6]\color{TUMAccentGreen}},
+  morekeywords=[7]{(,),[,],.},
+  keywordstyle={[7]\color{black}},
+  morecomment=**[l][\itshape\color{TUMAccentGreen}]{;;},
+}
