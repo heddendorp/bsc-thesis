@@ -2,3 +2,22 @@
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
 \chapter{Introduction}\label{chapter:introduction}
+
+WebAssembly is enabling new experiences on the web and could become a widely used universal bytecode outside of browsers as well. Since its introduction, WebAssembly has enabled many new experiences on the web. In 2019 the first runtimes meant to be used on embedded devices where published. In this thesis, we want to evaluate the concept of running WebAssembly on the ESP32 microcontroller and see what possible drawbacks it has.
+
+\paragraph{Microcontrollers}
+Meant for executing specific tasks, microcontrollers are small computers with minimal resources. They are designed with the aim to have just enough resources while keeping costs low. A popular system on a chip in this class is the ESP32 family. They are very affordable and can be used from experimentation and prototyping to production products. Their connectivity options and CPU performance makes them a great fit for the internet of things devices. We will focus our testing on running WebAssembly on the ESP32 in this thesis.
+
+\paragraph{WebAssembly}
+Since its beginning with static pages, the web has evolved to become a universal platform for applications, available on many different devices. However, even though browser engines have made significant progress at optimizing JavaScript, the only natively supported language on the web, there are still performance inconsistencies. To solve this problem, WebAssembly was created. It is a new, low-level bytecode format that allows running optimized code on browsers at near-native speeds. Being adopted by all major browser vendors, it is now almost universally available.
+
+But since WebAssembly has not explicit dependencies on the web platform, its attributes such as portability, safety, and speed, making it very useful outside of the browser too. Runtimes meant to be used on embedded devices have been becoming available recently and might open exciting new angles of programming a microcontroller.
+
+\section*{Assessing WebAssembly}
+
+In order to assess the current state of WebAssembly on the ESP32, we found a runtime, WASM3, which has support for the ESP32 running FreeRTOS. While other runtimes are available already, most of them only target desktop PCs. The only other runtime for embedded use, the WebAssembly micro runtime, does not support the ESP32 operating system. WASM3 also achieves the best execution speeds amongst WebAssembly runtimes in benchmarks.
+
+The comparison we are interested in is between the execution of code compiled to WebAssembly and compiled to native code. For this, we designed a collection of Workloads that are inspired by real-world applications. We ran those tests as WebAssembly and native code and measured the different behavior to gain more insight into the drawbacks and advantages of running WebAssembly.
+
+
+Being a new development, there is not much previous work on running WebAssembly on embedded devices. Most of the research is currently focused on the applications inside the browser. We are interested in this new format that can provide value to the internet of things devices using the ESP32 and what the currently available ecosystem looks like.

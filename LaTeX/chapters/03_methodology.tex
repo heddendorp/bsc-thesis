@@ -20,7 +20,7 @@ The speed of WASM3 is impressive, considering that even in browsers, a performan
 While the most basic interpreter can be thought of as a loop around a big switch statement that matches all possible instructions in the interpreted code, WASM3 follows a model dubbed M3 \autocite{shymanskyy_wasm3interpreter_2020}. In WASM3, the bytecode first gets compiled into operations for the meta machine, which is traversed by one operation calling the next, which relies on tail-call optimization by the compiler. This leads to an efficient and elegant execution model for their virtual machine.
 
 \section{Comparing the platform}
-After finding a way to run WebAssembly on the ESP32 and verifying it with basic tests, we had to find a way to measure how well that works. In order to compare different platforms, a popular tool is benchmarking, in which the same workload is run on multiple platforms to generate values to compare those platforms by.
+After finding a way to run WebAssembly on the ESP32 and verifying it with basic tests, we had to find a way to measure how well that works. In order to compare different platforms, a popular tool is benchmarking, in which the same workload is run on multiple platforms to generate values to compare those platforms.
 
 While most benchmarks are meant to provide a comparison of two hardware platforms, in this specific case, we are not interested in the performance of the platform. Instead, we are interested in the performance of different execution models on the same platform, being the default native execution of code explicitly compiled for the ESP32 and the interpreted execution of the WASM code that could run anywhere.
 
@@ -113,7 +113,7 @@ In order to provide this imported function at runtime, the setup for our tests h
 
 \lstinputlisting[language=C++, caption=Function linking, label=lst:test_native_main]{../data/test_native_main.cpp}
 
-In listing \ref{lst:test_native_main} line \ref{n-wat:global} we introduce a variable to hold a timestamp after the \lstinline{mark} function was called. In line \ref{n-wat:mark_link}, we define the function, which just saves the current timestamp and ends with success. This is then linked into the runtime in line \ref{n-wat:link}. To compare native execution this time we can not call the exact same function since it was not compiled to WASM at all, so we implement a similar function in line \ref{n-wat:mark_native} that is called during the test of native execution.
+In listing \ref{lst:test_native_main} line \ref{n-wat:global} we introduce a variable to hold a timestamp after the \lstinline{mark} function was called. In line \ref{n-wat:mark_link}, we define the function, which just saves the current timestamp and ends with success. This is then linked into the runtime in line \ref{n-wat:link}. To compare native execution this time, we can not call the exact same function since it was not compiled to WASM at all, so we implement a similar function in line \ref{n-wat:mark_native} that is called during the test of native execution.
 
 \subsection{Running TypeScript}\label{subsec:typeScript}
 
@@ -126,3 +126,7 @@ The generated WebAssembly code is almost identical as can be seen in listing \re
 \lstinputlisting[language=WebAssembly, caption=WASM code excerpt, label=lst:recursive_ts_wat]{../data/test_recursive.ts.wat}
 
 \section{Summary}
+
+In order to assess WebAssembly on the ESP32, we used a new Runtime from late 2019, WASM3. It is only the second runtime meant to run on embedded devices and the first one to date that supports FreeRTOS. It is an interpreter for WebAssembly that follows a meta machine pattern and achieves excellent speeds compared to other WebAssembly runtimes currently available.
+
+Secondly, we designed a collection of workloads that can be used to compare the WebAssembly execution to the native code execution. We modeled the tests after requirements, which applications on an MCU will have. These include function calls, memory access, computation, and the use of outside functions to interact with peripherals, for example. Additionally, we tested the ability of WebAssembly to be a target for new languages, not natively available on the controller, and wrote one test in TypeScript.

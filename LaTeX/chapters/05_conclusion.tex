@@ -2,3 +2,25 @@
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
 \chapter{Conclusion}\label{chapter:conclusion}
+
+This thesis showed the current status of running WebAssembly on the ESP32 and evaluated its viability. We explored the ecosystem around WebAssembly on embedded devices and established the necessary background to show the significance of our findings. We ran a selection of tests using the current state of the art technology available on the ESP32.
+
+\section*{Process}
+
+To run WebAssembly on the ESP32, we found the WASM3 runtime. It performs excellent compared to other WASM runtimes currently available and can be used on MCUs. We were not able to find a second runtime that would be usable on the ESP32 at this point. To run the tests, we set up a test environment, including compiling the test code to WASM.
+
+The test workloads we designed are modeled after tasks, which production application on an MCU would perform and show the behavior of the runtime in different circumstances. We tested function calls, memory access, matric multiplication, and the calling of outside functions. Thes might be needed to control the peripherals of the microcontroller. Additionally, we also ran one test that was written in TypeScript to see the experience of languages, not natively supported by the ESP32.
+
+\section*{Findings}
+
+Our tests showed that the interpreted execution of WebAssembly takes 40 - 90x longer than executing the same function natively compiled. Except for outside calls, where we noticed a slowdown lower than 4x. Also, programming for a WASM target is very limited right now since there is no unified system interface available that would allow the code to interact with the underlying OS.
+
+This significant performance decrease makes it a bad fit for CPU bound applications. Mitigating the lost performance with more devices would be very expensive and require much coordination. We also suspect the longer execution times to make the MCU use more energy than it does when running the same computation in native code, which could pose a problem to ultra low powered devices and should be researched further.
+
+However, our tests also showed the potential of WebAssembly. The test that used TypeScript to implement the same testing function that was originally written in C++ ran at a similar performance. This shows the advantage of WebAssembly being universal and supported as a target for many languages, that are not typically seen in embedded programming.
+
+Also, due to it is specific attributes, WebAssembly is well fitted for network transmission and dynamic execution. It also guarantees memory safety, which makes executing unknown code a much smaller risk. These properties allow network-connected devices to receive new instruction over the air and run them without a flash being required.
+
+\paragraph{Evaluation}
+
+WebAssembly on the ESP32 shows excellent potential for new ways of developing for embedded platforms. It opens systems to new languages and deployment strategies. Due to the performance decrease and missing system interface, it is certainly not a good fit for all applications right now. However, with the WebAssembly system interface being actively worked on and more embedded runtimes becoming available, we expect the attractiveness of WebAssembly to increase further. It stands to see if WebAssembly becomes the new universal bytecode, but we see powerful potential, even in the early stages.

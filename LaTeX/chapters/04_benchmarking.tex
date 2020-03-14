@@ -139,7 +139,7 @@ This test does show that more extended calculations and more sophisticated algor
 
 \subsection{Calling of native code}
 
-Of course, not all functionality can be included in the WASM module; especially native platform features will have to make use of functions only available outside of the module. When measuring the performance of calls outside the test-module, we are taking the total time of ten runs. The timings in table \ref{tab:times_native} show that the overhead introduced by the runtime for such a simple test case is relatively small. The interpreted code took less than 10x longer than the native calls.
+Of course, not all functionality can be included in the WASM module; mainly, native platform features will have to make use of functions only available outside of the module. When measuring the performance of calls outside the test-module, we are taking the total time of ten runs. The timings in table \ref{tab:times_native} show that the overhead introduced by the runtime for such a simple test case is relatively small. The interpreted code took less than 10x longer than the native calls.
 
 In a second test, which also returned a value to the WASM module, we did not see an additional increase in execution time, making this the best performing test in our experiments.
 
@@ -164,10 +164,10 @@ In a second test, which also returned a value to the WASM module, we did not see
 
 \subsection{Typescript execution}
 
-Colesely related to \ref{subsec:eval_recursive} is the test case running TypeScript, since it is the same test function and almost the same WASM code being tested. The observed results in table \ref{tab:times_typeScript} are very similar to the times measuren when executing WebAssembly code genrated from C++. Nonetheless, this test shows the exciting potetntial of running languages on the ESP32 that are not natively supported. Also it's interesting to note that, at least for this example, there is no performance loss by using TypeScript instead of C++.
+Closely related to \ref{subsec:eval_recursive} is the test case running TypeScript since it is the same test function and almost the same WASM code being tested. The observed results in table \ref{tab:times_typeScript} are very similar to the times measured when executing WebAssembly code generated from C++. Nonetheless, this test shows the exciting potential of running languages on the ESP32 that are not natively supported. Also, it is interesting to note that, at least for this example, there is no performance loss by using TypeScript instead of C++.
 
 \begin{sloppypar}
-    Of course the compilation of TypeScript to WebAssembly requires a different compiler than \lstinline{wasmc++}. We used the \lstinline{asc} compiler that is part of the AssemblyScript toolchain and compiled the TypeScript code by running \lstinline{asc index.ts -b test.wasm --validate -O3z --runtime none --noAssert}. After compilation we followed the same steps as with the other tests to run the comparison.
+    Of course, the compilation of TypeScript to WebAssembly requires a different compiler than \lstinline{wasmc++}. We used the \lstinline{asc} compiler that is part of the AssemblyScript toolchain and compiled the TypeScript code by running \lstinline{asc index.ts -b test.wasm --validate -O3z --runtime none --noAssert}. After compilation, we followed the same steps as with the other tests to run the comparison.
 \end{sloppypar}
 
 \begin{table}[h]
@@ -206,7 +206,7 @@ As we demonstrated in our tests, the WebAssembly code is interpreted at runtime;
 
 Since WebAssembly support in the browser is excellent already, all the tests we developed can alternatively be run in the browser. This allows embedded developers to test their programs locally in development and be able to make sure everything works as expected even before deploying it to an MCU for the first time. For the ESP32, for example, a browser emulator could be built, which provides all the native functions expected on the platform in JavaScript.
 
-Additionally, we showed in the last test that WebAssembly can open the doors for new languages that are not natively supported on the MCU. In our example, we were able to program the ESP32 by using TypeScript, which usually compiles to JavaScript. However, in our example, we compiled it to WebAssembly and were able to run it on the ESP32. This enables developers without previous to get into embedded programming from their current field of work.
+Additionally, we showed in the last test that WebAssembly could open the doors for new languages that are not natively supported on the MCU. In our example, we were able to program the ESP32 by using TypeScript, which usually compiles to JavaScript. However, in our example, we compiled it to WebAssembly and were able to run it on the ESP32. This enables developers without previous to get into embedded programming from their current field of work.
 
 \subsection{Usecase examples on the ESP32}
 
@@ -217,3 +217,7 @@ Should the most time-consuming things not be calculations and similar tasks, tho
 A very promising use-case of WASM is the customization of device behavior. This example is often given and also supported by the results of our tests and relies on the interoperation of the native code with the loaded WASM module. An IoT device could, for example, have an extensive API and allow the user to deploy logic in the form of a WebAssembly module making use of all the API functions. Here, other features of WebAssembly also come into play, such as it is security guarantees, which make it safer to execute unknown code on the device.
 
 \section{Summary}
+
+To run the Benchmarks, we compiled the testing code to WebAssembly and set up a test function that can be run on the microcontroller. The test function initialized the runtime and loaded the WebAssembly code. Thereafter it runs both the WASM function and the native implementation 1000 times, taking the average runtime of ten runs. Every test aimed to run the same code once compiled to WebAssembly and once being part of the regular native compilation.
+
+Our tests show a significant slowdown of up to 93x when running the code in WebAssembly, which leads to significant disadvantages when running CPU bound applications on the MCU. With applications that are not limited by the CPU performance but by a slow sensor readout or network interaction, for example, it would not pose as much of a problem. Also, we saw that the TypeScript code, compiled to WebAssembly, ran at a very similar performance to the C++ code compiled to WASM, showing that new languages can be used without additional performance decrease.
