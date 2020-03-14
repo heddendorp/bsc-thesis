@@ -25,7 +25,7 @@ Since this thesis is focused on the use of WebAssembly on microcontrollers, we w
                  (2017,25.8) (2018,28.1) (2019,26.9) (2020,28.5) (2021,31) (2022,33.5) (2023,38)};
         \end{axis}
     \end{tikzpicture}
-    \caption{MCU shipments worldwide from 2015 to 2023 (in billions)}
+    \caption{MCU shipments worldwide from 2015 to 2023 (in billions) \autocite{ic_insights_microcontroller_2019}}
 \end{figure}
 
 Core elements of an MCU are the processor, memory, and I/O peripherals. The Processor (CPU) can be thought of as the brain of the MCU. It performs basic arithmetic, logic, and I/O operations. Memory is where any data is stored; the processor needs to fulfill its tasks. Lastly, the I/O peripherals are the controller's connection to the outside world; they allow the receiving and sending of information, such as receiving a signal from a switch and turning on a light in response.
@@ -62,7 +62,7 @@ Together with the binary format of WebAssembly, there is a text format that defi
 Other than most stack machines, WebAssebly provides structured control flow instead of arbitrary jumps \autocite{noauthor_instructions_nodate}. Figure \ref{fig:control_flow} shows the control flow syntax in WebAssebly, which shows that all block, loop, and if constructs must be terminated with the end instruction and have to be correctly nested. They bracket nested sequences of instructions referred to as blocks in WASM; each block has an implicit label, which is the target for branch instructions.
 
 \begin{figure}[h]
-    \begin{equation}
+    \begin{equation}\nonumber
         \begin{split}
             \begin{array}{llcl}
                 \mathit{instr} &::=&

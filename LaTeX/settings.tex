@@ -20,6 +20,7 @@
 \usepackage{listings}
 \usepackage{lstautogobble}
 \usepackage{tikz}
+\usepackage{siunitx}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{booktabs}
@@ -58,6 +59,11 @@
   cycle list={TUMBlue\\TUMAccentOrange\\TUMAccentGreen\\TUMSecondaryBlue2\\TUMDarkGray\\},
 }
 
+\sisetup{
+  group-four-digits = true,
+  group-separator = {,}
+}
+
 % Settings for lstlistings
 \lstset{%
   numbers=left,
@@ -68,13 +74,14 @@
   breaklines=false,
   autogobble,
   keywordstyle=\bfseries\color{TUMBlue},
-  stringstyle=\color{TUMAccentGreen}
+  stringstyle=\color{TUMAccentOrange},
+  commentstyle=\color{TUMAccentGreen},
+  ndkeywordstyle=\color{TUMDarkGray}\bfseries,
 }
 
 \lstdefinelanguage{JavaScript}{
   keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
   ndkeywords={class, export, boolean, throw, implements, import, this},
-  ndkeywordstyle=\color{TUMDarkGray}\bfseries,
   sensitive=false,
   comment=[l]{//},
   morecomment=[s]{/*}{*/},

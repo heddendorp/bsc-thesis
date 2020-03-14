@@ -105,7 +105,7 @@ As is obvious from listing \ref{lst:native_test}, the test code just calls the o
 
 The resulting WASM code does not include the \lstinline{mark} method, but instead imports it from the \lstinline{thesis} module that is expected to be available at runtime.
 
-\lstinputlisting[caption=WASM code for the outside call, label=lst:test_native_wasm]{../data/test_native.wat}
+\lstinputlisting[language=WebAssembly, caption=WASM code for the outside call, label=lst:test_native_wasm]{../data/test_native.wat}
 
 As displayed in listing \ref{lst:test_native_wasm} line \ref{n-wat:import} the mark function from the thesis module is imported as defined in listing \ref{lst:test_native_api}. The run function then just calls the imported function in line \ref{n-wat:call}.
 
