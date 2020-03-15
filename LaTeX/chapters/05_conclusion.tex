@@ -7,9 +7,9 @@ This thesis showed the current status of running WebAssembly on the ESP32 and ev
 
 \section*{Process}
 
-To run WebAssembly on the ESP32, we found the WASM3 runtime. It performs excellent compared to other WASM runtimes currently available and can be used on MCUs. We were not able to find a second runtime that would be usable on the ESP32 at this point. To run the tests, we set up a test environment, including compiling the test code to WASM.
+To run WebAssembly on the ESP32, we found the WASM3 runtime. It performs excellenty compared to other WASM runtimes currently available and can be used on MCUs. We were not able to find a second runtime that would be usable on the ESP32 at this point. To run the tests, we set up a test environment, including compiling the test code to WASM.
 
-The test workloads we designed are modeled after tasks, which production application on an MCU would perform and show the behavior of the runtime in different circumstances. We tested function calls, memory access, matric multiplication, and the calling of outside functions. Thes might be needed to control the peripherals of the microcontroller. Additionally, we also ran one test that was written in TypeScript to see the experience of languages, not natively supported by the ESP32.
+The test workloads we designed are modeled after tasks, which production application on an MCU would perform and show the behavior of the runtime in different circumstances. We tested function calls, memory access, matric multiplication, and the calling of outside functions. Those might be needed to control the peripherals of the microcontroller. Additionally, we also ran one test that was written in TypeScript to see the experience of languages, not natively supported by the ESP32.
 
 \section*{Findings}
 
